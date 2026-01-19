@@ -4,22 +4,17 @@ import logging
 import os
 from datetime import datetime, timezone, timedelta
 
-
+# Parameters for llm
 endpoint = os.getenv("openai_endpoint")
 api_key = os.getenv("openai_key")
 api_version = "2024-12-01-preview"
 model_name = "gpt-4.1"
 
-
 document_types = """Medical Aid/ Medical Scheme Certificate,Employee Tax Certificate, Retirement Annuity Certificate, Investment Income Certificate,
                      Medical Expenses, Travel Log Book, Other"""
 
 def initialize_llm_inputs():
-    ### Initialize client
-    # client = OpenAI(
-    #     base_url=endpoint,
-    #     api_key=api_key
-    # )
+    #Initialize Azure OpenAI client
     client = AzureOpenAI(
         api_version=api_version,
         azure_endpoint=endpoint,
@@ -40,7 +35,6 @@ def initialize_llm_inputs():
     Do not include any text outside of this JSON object. If more than one type is identified, separate them with commas."""
 
     return client, system_prompt, user_prompt
-
 
 ################################## Run LLM Classification ##################################
 def run_llm_classification(client,document_content: str,full_file_name: str, system_prompt: str, user_prompt: str):
@@ -83,6 +77,5 @@ def run_llm_classification(client,document_content: str,full_file_name: str, sys
         logging.exception(f"OpenAI API call failed: {e}")
     except Exception as e:
         logging.exception(f"Unexpected error during classification: {e}")
-
 
     return completion, response

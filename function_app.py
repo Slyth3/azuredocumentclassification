@@ -7,7 +7,6 @@ from azure.storage.blob import BlobServiceClient
 import logging
 import os
 import base64
-# from datetime import datetime, timezone, timedelta
 
 ## import local files
 import run_DocumentIntelligence as docintel

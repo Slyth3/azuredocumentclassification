@@ -4,7 +4,6 @@ import time
 import os
 import requests
 
-
 def run_DocIntel(post_url, pdf_source,api_key):
 
     headers = {
@@ -27,7 +26,6 @@ def run_DocIntel(post_url, pdf_source,api_key):
     get_url = resp.headers["operation-location"]
 
     return get_url
-
 
 def get_DocIntel_results(api_key, get_url, poll_interval, max_wait):
 
