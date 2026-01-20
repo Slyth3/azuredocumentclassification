@@ -64,8 +64,8 @@ def blob_documentprocessing(myblob: func.InputStream):
         ##########################  Call LLM Classification
         try:
 
-            client, system_prompt, user_prompt = llmclass.initialize_llm_inputs()
-            llm_completion, llm_response = llmclass.run_llm_classification(client,full_text,full_file_name, system_prompt, user_prompt)
+            client, system_prompt, user_prompt, example_text, example_response = llmclass.initialize_llm_inputs()
+            llm_completion, llm_response = llmclass.run_llm_classification(client,full_text,full_file_name, system_prompt, user_prompt, example_text, example_response)
             # Get the current local date and time as a datetime object
         ##########################  Save results to Blob Storage
             try:
@@ -133,8 +133,8 @@ def http_documentprocessing(req: func.HttpRequest) -> func.HttpResponse:
         # docintel_output = f"File size: {len(pdf_bytes)} bytes \n\nExtracted Text:\n{full_text}"
         ##########################  Call LLM Classification
         try:
-            client, system_prompt, user_prompt = llmclass.initialize_llm_inputs()
-            llm_completion, llm_response = llmclass.run_llm_classification(client,full_text,full_file_name, system_prompt, user_prompt)
+            client, system_prompt, user_prompt, example_text, example_response = llmclass.initialize_llm_inputs()
+            llm_completion, llm_response = llmclass.run_llm_classification(client,full_text,full_file_name, system_prompt, user_prompt, example_text, example_response)
         ##########################  Fabric Event Hub - Save data 
             try:
                 eventhub_response = eventhub.eventhub_save(eventhub_endpoint, eventhub_name, llm_response)
