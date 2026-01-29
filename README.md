@@ -6,12 +6,12 @@ An automated Azure-based document processing pipeline that leverages Azure Docum
 
 This project implements a serverless document processing system that:
 
-1. **Ingests** PDF documents from Azure Blob Storage
+1. **Ingests** PDF documents from Azure Blob Storage or http post
 2. **Extracts** content using Azure Document Intelligence (prebuilt-layout model)
 3. **Classifies** documents using Azure OpenAI LLM (GPT-4)
-4. **Publishes** results to Azure Event Hub for downstream consumption
+4. **Publishes** results to Microsoft Farbic Lakehouse using Azure Event Hub 
 
-The system is built as an Azure Function that automatically triggers on new document uploads, enabling a fully automated, scalable processing workflow.
+The system is built as an Azure Function that automatically triggers on new document uploads or http requets, enabling a fully automated, scalable processing workflow.
 
 ## 🏗️ Architecture
 
@@ -26,7 +26,7 @@ The system is built as an Azure Function that automatically triggers on new docu
 ### Workflow
 
 ```
-Document Upload → Blob Trigger → Document Intelligence → LLM Classification → Event Hub
+Document Upload → Blob Trigger/http trigger → Document Intelligence → LLM Classification → Event Hub
      (Input)         (Function)       (Content Extraction)   (Document Type)     (Output)
 ```
 
@@ -143,7 +143,7 @@ Supported document classifications (defined in `run_LLMClasscification.py`):
 |---------|---------|
 | `azure-functions` | Azure Functions SDK |
 | `azure-storage-blob` | Blob Storage integration |
-| `azure-eventhub` | Event Hub integration |
+| `azure-eventhub` | Event Hub integration (For Fabric Lakehouse storage) |
 | `azure-identity` | Azure authentication |
 | `requests` | HTTP client for Document Intelligence API |
 | `openai` | Azure OpenAI SDK |
@@ -151,9 +151,14 @@ Supported document classifications (defined in `run_LLMClasscification.py`):
 
 ## 🔄 Processing Flow
 
-### 1. Blob Trigger
+### 1.1 Blob Trigger
 - Monitors the `document-processing-dropzone/Input/` container
 - Automatically triggers on PDF upload
+
+### 1.2 HTTP Trigger
+- Monitors the http endpoint for the function app
+- Post requests with APIKey to the endpoint will trigger the process e.g. http://localhost:7071/api/func_document_processing?code=<APIKEY>== 
+- Pdf file must form part of the binary body 
 
 ### 2. Document Intelligence
 - Converts PDF to base64 encoding
@@ -216,14 +221,12 @@ Use `code_testing.ipynb` for:
 
 ### Current Limitations
 - ✋ Embeddings for large documents not yet implemented
-- ✋ Document Intelligence SDK migration in progress
 - ✋ No chunking strategy for documents exceeding 2 MB item limits
 
 ### Planned Enhancements
 - [ ] Implement document chunking for large files
 - [ ] Add vector embeddings for semantic search
-- [ ] Migrate to Document Intelligence Python SDK
-- [ ] Add retry logic with exponential backoff
+- [x] Migrate to Document Intelligence Python SDK
 - [ ] Implement dead-letter handling for failed documents
 - [ ] Add comprehensive error tracking and alerting
 
@@ -236,34 +239,20 @@ Use `code_testing.ipynb` for:
 - Monitor and audit Event Hub consumers
 
 ## 📝 Environment Variables Reference
+Stored in local.settings.json 
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `Eventhub_endpoint` | Event Hub namespace endpoint | ✓ |
-| `Eventhub_name` | Event Hub instance name | ✓ |
-| `docintelligenceendpoint` | Document Intelligence API endpoint | ✓ |
-| `docintelligencekey` | Document Intelligence API key | ✓ |
-| `openai_endpoint` | Azure OpenAI API endpoint | ✓ |
-| `openai_key` | Azure OpenAI API key | ✓ |
-| `AzureWebJobsStorage` | Blob Storage connection string | ✓ |
-| `rgdocumentprocessinb772_STORAGE` | Blob Storage connection for function trigger | ✓ |
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
-
-## 📄 License
-
-[Add your license here]
+| Variable | Description |
+|----------|-------------|
+| `Eventhub_endpoint` | Event Hub namespace endpoint | 
+| `Eventhub_name` | Event Hub instance name |
+| `docintelligenceendpoint` | Document Intelligence API endpoint |
+| `docintelligencekey` | Document Intelligence API key |
+| `openai_endpoint` | Azure OpenAI API endpoint |
+| `openai_key` | Azure OpenAI API key |
+| `AzureWebJobsStorage` | Blob Storage connection string |
+| `rgdocumentprocessinb772_STORAGE` | Blob Storage connection for function trigger |
 
 ## 📞 Support
 
-For issues or questions, please open an issue in the repository or contact the development team.
+For issues or questions, please open an issue in the repository or contact the Andrew Schleiss.
 
----
-
-**Last Updated**: January 2026
