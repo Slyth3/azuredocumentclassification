@@ -4,6 +4,9 @@
 
 azure-functions
 #added for document intelligence
+azure-ai-documentintelligence
+azure-identity
+# other
 cryptography
 azure-storage-blob
 azure-eventhub

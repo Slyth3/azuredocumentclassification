@@ -58,7 +58,7 @@ def blob_documentprocessing(myblob: func.InputStream):
         results = docintel.get_DocIntel_results(docintel_apim_key, get_url, poll_interval, max_wait)
         #Process results into text 
         full_text = docintel.process_results(results)
-        logging.info("Text extracted from Document Intelligence results\n")
+        logging.info(f"Text extracted from Document Intelligence, results:\n {full_text}\n")
         # docintel_output = f"File size: {len(pdf_bytes)} bytes \n\nExtracted Text:\n{full_text}"
     
         ##########################  Call LLM Classification
@@ -129,7 +129,7 @@ def http_documentprocessing(req: func.HttpRequest) -> func.HttpResponse:
         results = docintel.get_DocIntel_results(docintel_apim_key, get_url, poll_interval, max_wait)
         ########################## Process results into text 
         full_text = docintel.process_results(results)
-        logging.info("Document processing executed successfully\n")
+        logging.info(f"Text extracted from Document Intelligence, results:\n {full_text}\n")
         # docintel_output = f"File size: {len(pdf_bytes)} bytes \n\nExtracted Text:\n{full_text}"
         ##########################  Call LLM Classification
         try:
