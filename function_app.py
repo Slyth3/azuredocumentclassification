@@ -1,6 +1,8 @@
 # To do 
-## * Document Intelligence - convert to SDK 
-## Embeddings for large documents - chunking
+## Error Handing 
+## Confidence score for llm classification
+## Embeddings for large documents OR set token limitations 
+## document intelligence convert to SDK 
 
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
@@ -52,14 +54,12 @@ def blob_documentprocessing(myblob: func.InputStream):
         file_name=(os.path.splitext(full_file_name)[0]) 
         logging.info("Name:%s\n", full_file_name)
 
-        ##########################  Call Document Intelligence endpoint 
-        get_url = docintel.run_DocIntel(docintel_post_url, pdf_base64, docintel_apim_key)
-        # Get: Document Analysis Retrieval (note that this is asynchronous)   
-        results = docintel.get_DocIntel_results(docintel_apim_key, get_url, poll_interval, max_wait)
-        #Process results into text 
+        # ##########################  Call Document Intelligence endpoint 
+        results = docintel.run_document_intelligence(pdf_base64, docintel_apim_key, docintel_endpoint)
+
+        # Process results into text 
         full_text = docintel.process_results(results)
         logging.info(f"Text extracted from Document Intelligence, results:\n {full_text}\n")
-        # docintel_output = f"File size: {len(pdf_bytes)} bytes \n\nExtracted Text:\n{full_text}"
     
         ##########################  Call LLM Classification
         try:
@@ -82,6 +82,7 @@ def blob_documentprocessing(myblob: func.InputStream):
                     f"File size: {len(pdf_bytes)} bytes\n"
                     f"Date Processed: {llm_response['Datetime']}\n\n"
                     f"LLM Result: {llm_response['Result']}\n"
+                    f"LLM Confidence: {llm_response.get('Confidence', 'N/A')}\n"
                     f"LLM Explanation: {llm_response['Explanation']}\n\n"
                     f"Extracted Text:\n{llm_response['ExtractedText']}" 
                 )
@@ -123,14 +124,13 @@ def http_documentprocessing(req: func.HttpRequest) -> func.HttpResponse:
         pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8") 
         logging.info(f"File read and converted to base64, with file size: {len(pdf_bytes)} bytes\n")
 
-        ##########################  Call Document Intelligence endpoint 
-        get_url = docintel.run_DocIntel(docintel_post_url, pdf_base64, docintel_apim_key)
-        ########################## # Get: Document Analysis Retrieval (note that this is asynchronous)   
-        results = docintel.get_DocIntel_results(docintel_apim_key, get_url, poll_interval, max_wait)
+        # ##########################  Call Document Intelligence endpoint 
+        results = docintel.run_document_intelligence(pdf_base64, docintel_apim_key, docintel_endpoint)
+
         ########################## Process results into text 
         full_text = docintel.process_results(results)
         logging.info(f"Text extracted from Document Intelligence, results:\n {full_text}\n")
-        # docintel_output = f"File size: {len(pdf_bytes)} bytes \n\nExtracted Text:\n{full_text}"
+
         ##########################  Call LLM Classification
         try:
             client, system_prompt, user_prompt, example_text, example_response = llmclass.initialize_llm_inputs()
@@ -145,6 +145,7 @@ def http_documentprocessing(req: func.HttpRequest) -> func.HttpResponse:
                     f"File size: {len(pdf_bytes)} bytes\n"
                     f"Date Processed: {llm_response['Datetime']}\n\n"
                     f"LLM Result: {llm_response['Result']}\n"
+                    f"LLM Confidence: {llm_response.get('Confidence', 'N/A')}\n"
                     f"LLM Explanation: {llm_response['Explanation']}\n\n"
                     f"Extracted Text:\n{llm_response['ExtractedText']}" 
                 )
